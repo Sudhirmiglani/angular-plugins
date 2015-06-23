@@ -1,0 +1,27 @@
+angular.module('app').directive('triggerEvents', function ($timeout) {
+    return {
+        restrict: 'A',
+        link : function(scope, elem, attrs, ctrl){
+            var tokens = attrs.triggerEvents.split(',');
+            console.log(tokens);
+            for(var i=0; i < tokens.length; i++) {
+                var token = tokens[i].split(':');
+                console.log(token[1]);
+                var element = document.getElementById(token[0]);
+                console.log(element);
+                var fn = element[token[1]];
+                triggerEventWithFunctionNameAsString(element, fn);
+            }
+
+            function triggerEventWithFunctionNameAsString(context, eventName){
+                $timeout(function(){
+                    if(typeof eventName === "function"){
+                        eventName.call(context);
+                    }else{
+                        console.log('Cannot trigger event ' + eventName + ' on ' + context);
+                    }
+                },0);
+            }
+        }
+    };
+});
