@@ -1,0 +1,69 @@
+angular.module('app').directive('numberOnly', [function () {
+    return {
+        require: 'ngModel',
+        link: function (scope, elem, attrs, ctrl) {
+
+            function inputFromUser(text) {
+                if (text) {
+                    var transformedInput = text.replace(/[^0-9]/g, '');
+
+                    if (transformedInput !== text) {
+                        ctrl.$setViewValue(transformedInput);
+                        ctrl.$render();
+                    }
+                    if(transformedInput.length == 0){
+                        ctrl.$setPristine();
+                    }
+                    return transformedInput;
+                }
+                return undefined;
+            }
+
+            ctrl.$parsers.push(inputFromUser);
+
+            var type = attrs.numberOnly || "mobile";
+            // type - mobile or otp
+            if(type == 'otp'){
+                ctrl.$setValidity('otpValid', true);
+            }
+
+            elem.on('blur', function (evt) {
+
+                if(elem.val().length == 0){
+                    return;
+                }
+                scope.$apply(function () {
+
+                    if(type == 'otp'){
+                        if(elem.val().length != 6) {
+                            ctrl.$setValidity('otpValid', false);
+                        }else{
+                            ctrl.$setValidity('otpValid', true);
+                        }
+                    }
+
+                    // for mobile
+                    else if (/^[57-9]{1}[0-9]{9}$/.test(elem.val())) {
+                        ctrl.$setValidity('mobileValid', true);
+                    } else {
+                        ctrl.$setValidity('mobileValid', false);
+                    }
+                });
+
+            });
+
+            elem.on('focus', function (evt) {
+
+                scope.$apply(function () {
+                    if(type == 'otp'){
+                        ctrl.$setValidity('otpValid', true);
+                    }else{
+                        ctrl.$setValidity('mobileValid', true);
+                    }
+                });
+
+            });
+        }
+
+    }
+}]);
